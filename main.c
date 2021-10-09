@@ -11,7 +11,7 @@ typedef struct Pacientes
 	int tempoRecep;
 	int tempoMedico;
 	struct Pacientes *prox;
-}pacientes;
+} pacientes;
 
 //gera valor aleatorio entre lim_inf e lim_sup
 int gerarNumeroAleatorio(int lim_inf, int lim_sup)
