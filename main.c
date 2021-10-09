@@ -2,6 +2,7 @@
 #include <stdlib.h> //necessário para usar as funções malloc() e free()
 #include <conio.h>
 #include <time.h>
+#include <string.h>
 
 /*Criando a struct */
 typedef struct Pacientes
@@ -62,7 +63,7 @@ int vazia(pacientes *FILA)
 		return 0;
 }
 
-void insere(pacientes *FILA, int identificacao_paciente, int tempo_fila_rec)
+void push(pacientes *FILA, int identificacao_paciente, int tempo_fila_rec)
 {
 	pacientes *novo = aloca(identificacao_paciente, tempo_fila_rec);
 
@@ -79,28 +80,67 @@ void insere(pacientes *FILA, int identificacao_paciente, int tempo_fila_rec)
 	}
 }
 
-void display(pacientes *Lista)
+pacientes *pop(pacientes *FILA)
+{
+	if (FILA->prox == NULL)
+	{
+		printf("Fila ja esta vazia\n");
+		//return NULL;
+	}
+	else
+	{
+		pacientes *tmp = FILA->prox;
+		FILA->prox = tmp->prox;
+		return tmp;
+	}
+}
+
+void display(pacientes *Lista, char* nome)
 {
 	pacientes *aux = Lista; //cria nó auxiliar
 
 	if (aux == NULL)
 	{
-		printf("Lista vazia\n\n"); //lista vazia se for igual a NULL
+		printf("Lista vazia\n"); //lista vazia se for igual a NULL
 	}
 
+	printf("%s\n", nome);
 	for (aux = Lista; aux != NULL; aux = aux->prox)
 	{
-		printf("cod - %i\n", aux->id);
+		printf("%i - ", aux->id);
 	}
+		printf("\n\n");
+}
+
+void copiarFila(pacientes *destino, pacientes *origem)
+{
+	destino->id = origem->id;
+	destino->tempoEntrada = origem->tempoEntrada;
+	destino->tempoRecep = origem->tempoRecep;
+	destino->tempoMedico = origem->tempoMedico;
+	destino->prox = NULL; //como não é uma fila, remove o próximo (restante da fila (ele fica sozinho na recepcao))
 }
 
 int main(void)
 {
 	pacientes *fila_rec; //definindo o ponteiro do tipo pacientes
 	int identificacao_paciente = 1, num_pacientes;
+	//tempo em segundos que corre no while principal
 	int tempo_atual;
-	//declara tempo p/ o proximo na fila da rec e tempo de entrada na fila da rec de cada um
+	//tempo de controle utilizado na recepcao e no registro do usuario
+	int tempo_rec, tempo_prox_rec;
+	//declara tempo p/ o proximo na fila da rec e tempo de entrada na fila da rec de cada usuario
 	int tempo_prox_fila_rec, tempo_fila_rec = gerarNumeroAleatorio(3, 21);
+
+	pacientes *recepcao = NULL;
+
+	//aux temporaria
+	int aux = 0;
+
+	srand(time(NULL));
+
+	printf("Informe a quantidade de pacientes para a simualcao: \n");
+	scanf("%i", &num_pacientes);
 
 	/** gera o primeiro paciente na fila da recepção */
 	fila_rec = (pacientes *)malloc(sizeof(pacientes));
@@ -114,32 +154,68 @@ int main(void)
 
 	tempo_prox_fila_rec = tempo_fila_rec + geraTempo();
 
-	while (1)
+	//utilizei a "identificacao_paciente" como controle, ja que ele ele icrementa a partir de 1
+	while (num_pacientes != identificacao_paciente && aux != num_pacientes)
 	{
 		tempo_atual = geraTempo(); //fica gerando o segundo atual
 
 		if (tempo_prox_fila_rec == tempo_atual)
 		{
 			identificacao_paciente++;
-			insere(fila_rec, identificacao_paciente, tempo_fila_rec); //insere um novo na fila
 
-			display(fila_rec);
+			if (fila_rec == NULL)
+			{
+				fila_rec = aloca(identificacao_paciente, tempo_fila_rec); //se a lista estiver vazia, adiciona
+			}
+			else
+			{
+				push(fila_rec, identificacao_paciente, tempo_fila_rec); //push um novo na fila
 
-			tempo_fila_rec = gerarNumeroAleatorio(3, 21);
-			tempo_prox_fila_rec = tempo_fila_rec + tempo_atual;
+				tempo_fila_rec = gerarNumeroAleatorio(3, 21);
+				tempo_prox_fila_rec = tempo_fila_rec + tempo_atual;
 
-			if (tempo_prox_fila_rec >= 60)
-			{																									//existe um momento em que a soma passa dos 60 seg
-				tempo_prox_fila_rec = tempo_prox_fila_rec - 60; //então é necessário subtrair esse valor
+				if (tempo_prox_fila_rec >= 60)
+				{																									//existe um momento em que a soma passa dos 60 seg
+					tempo_prox_fila_rec = tempo_prox_fila_rec - 60; //então é necessário subtrair esse valor
+				}
 			}
 
-			printf("\n\ntempo_atual -> %d\n", tempo_atual);
+			display(fila_rec, "fila_rec");
+
+			printf("\ntempo_atual -> %d\n", tempo_atual);
 			printf("tempo_fila_rec -> %d\n", tempo_fila_rec);
 			printf("tempo_prox_fila_rec -> %d\n", tempo_prox_fila_rec);
+			printf("\ntempo_prox_rec -> %d\n", tempo_prox_rec);
+		}
+
+		if (tempo_prox_rec == tempo_atual || recepcao == NULL)
+		{
+			if (fila_rec != NULL)
+			{
+				recepcao = NULL;
+				recepcao = (pacientes *)malloc(sizeof(pacientes));
+
+				copiarFila(recepcao, fila_rec); //adiciona o primeiro da fila na recepcao
+
+				fila_rec = pop(fila_rec); //remove da fila da recepcao o primeiro já que ele já chegou na recepcao
+
+				display(recepcao, "rec");
+
+				tempo_rec = gerarNumeroAleatorio(7, 12);
+				recepcao->tempoRecep = tempo_rec;
+
+				tempo_prox_rec = tempo_rec + tempo_atual;
+
+				if (tempo_prox_rec >= 60)
+				{																				//existe um momento em que a soma passa dos 60 seg
+					tempo_prox_rec = tempo_prox_rec - 60; //então é necessário subtrair esse valor
+				}
+				aux++;
+				printf("aux -> %i\n",aux);
+				printf("num_pacientes -> %i\n",num_pacientes);
+			}
 		}
 	}
-
-	srand(time(NULL));
 
 	free(fila_rec);
 
