@@ -185,7 +185,7 @@ int main(void)
   int tempo_med = 0, tempo_prox_med = 0;
 
   //aux temporaria
-  int aux = 0, k = 1;
+  int fim = 1;
 
   srand(time(NULL));
 
@@ -212,7 +212,7 @@ int main(void)
 
   //utilizei a "identificacao_paciente" como controle, ja que ele ele icrementa a partir de 1
   //num_pacientes != identificacao_paciente &&
-  while (aux != num_pacientes)
+  while (fim)
   {
     tempo_atual = geraTempo(); //fica gerando o segundo atual
 
@@ -255,7 +255,7 @@ int main(void)
               recepcao->tempoFilaRecep,
               recepcao->tempoRecep,
               recepcao->tempoFilaMedico); //push um novo na fila
-          
+
           recepcao = NULL;
         }
       }
@@ -298,10 +298,6 @@ int main(void)
 
         fila_med = pop(fila_med); //remove da fila do medico o primeiro já que ele já chegou no medico
 
-        fflush(stdout);
-        system("cls");
-        display(fila_rec, recepcao, fila_med, medico, tempo_atual, tempo_fila_rec, tempo_prox_fila_rec, tempo_prox_rec, tempo_prox_med);
-        printf("\nmedicooo");
         tempo_med = gerarNumeroAleatorio(15, 25); //ficam de 15 a 25 no consultorio
 
         medico->tempoFilaMedico = medico->tempoFilaMedico - tempo_atual; //esse é o calculo do tempo de espera na fila do medico
@@ -310,13 +306,18 @@ int main(void)
         tempo_prox_med = tempo_med + tempo_atual;
         tempo_prox_med = ajustaTempo(tempo_prox_med);
 
-        aux++;
+        fflush(stdout);
+        system("cls");
+        display(fila_rec, recepcao, fila_med, medico, tempo_atual, tempo_fila_rec, tempo_prox_fila_rec, tempo_prox_rec, tempo_prox_med);
+      }
+      else
+      {
+        fim = 0;
       }
     }
   }
 
-  printf("num_pacientes -> %i\nid -> %i\naux -> %i\n", num_pacientes, identificacao_paciente, aux);
-
+  display(fila_rec, recepcao, fila_med, medico, tempo_atual, tempo_fila_rec, tempo_prox_fila_rec, tempo_prox_rec, tempo_prox_med);
   free(fila_rec);
 
   //getch();
