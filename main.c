@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h> //necessário para usar as funções malloc() e free()
-//#include <conio.h>
+#include <conio.h>
 #include <time.h>
 #include <string.h>
 
@@ -96,7 +96,6 @@ pacientes *pop(pacientes *FILA)
 {
   if (FILA->prox == NULL)
   {
-    printf("pop null\n");
     return NULL;
   }
   else
@@ -163,16 +162,109 @@ void copiarFila(pacientes *destino, pacientes *origem)
   destino->tempoRecep = origem->tempoRecep;
   destino->tempoFilaMedico = origem->tempoFilaMedico;
   destino->tempoMedico = origem->tempoMedico;
+  destino->tempoFilaRecepSaida = origem->tempoFilaRecepSaida;
+  destino->tempoRecepSaida = origem->tempoRecepSaida;
   destino->prox = NULL; //como não é uma fila, remove o próximo (restante da fila (ele fica sozinho na recepcao))
 }
 
-int ajustaTempo(int tempo_prox_fila_rec)
+int ajustaTempo(int prox_tempo)
 {
-  if (tempo_prox_fila_rec >= 60)
-  {                                                        //existe um momento em que a soma passa dos 60 seg
-    return tempo_prox_fila_rec = tempo_prox_fila_rec - 60; //então é necessário subtrair esse valor
+  if (prox_tempo >= 60)
+  {                                      //existe um momento em que a soma passa dos 60 seg
+    return prox_tempo = prox_tempo - 60; //então é necessário subtrair esse valor
   }
-  return tempo_prox_fila_rec;
+  return prox_tempo;
+}
+
+void displayDados(pacientes *Fila)
+{
+  pacientes *aux = Fila; //cria nó auxiliar
+
+  system("cls");
+
+  for (aux; aux != NULL; aux = aux->prox)
+  {
+    printf("Id -> %i\n", aux->id);
+    printf("Fila Recepcao -> %i\n", aux->tempoFilaRecep);
+    printf("Recepcao - > %i\n", aux->tempoRecep);
+    printf("Fila Medico -> %i\n", aux->tempoFilaMedico);
+    printf("Medico -> %i\n", aux->tempoMedico);
+    printf("Fila Recepcao Saida -> %i\n", aux->tempoFilaRecepSaida);
+    printf("Recepcao Saida -> %i\n\n", aux->tempoRecepSaida);
+  }
+}
+
+void displayRelatorio(pacientes *Fila)
+{
+  pacientes *aux = Fila; //cria nó auxiliar
+  int fila_recep_min = aux->tempoFilaRecep, fila_recep_max = aux->tempoFilaRecep;
+  float fila_recep_med = 0;
+
+  int recep_min = aux->tempoRecep, recep_max = aux->tempoRecep;
+  float recep_med = 0;
+
+  int fila_med_min = aux->tempoFilaMedico, fila_med_max = aux->tempoFilaMedico;
+  float fila_med_med = 0;
+
+  int med_min = aux->tempoMedico, med_max = aux->tempoMedico;
+  float med_med = 0;
+
+  int fila_recep_saida_min = aux->tempoFilaRecepSaida, fila_recep_saida_max = aux->tempoFilaRecepSaida;
+  float fila_recep_saida_med = 0;
+
+  int recep_saida_min = aux->tempoRecepSaida, recep_saida_max = aux->tempoRecepSaida;
+  float recep_saida_med = 0;
+
+  for (aux; aux != NULL; aux = aux->prox)
+  {
+    fila_recep_min = fila_recep_min > aux->tempoFilaRecep ? aux->tempoFilaRecep : fila_recep_min;
+    fila_recep_med = aux->prox != NULL ? fila_recep_med + aux->tempoFilaRecep : (fila_recep_med + aux->tempoFilaRecep) / aux->id;
+    fila_recep_max = fila_recep_max < aux->tempoFilaRecep ? aux->tempoFilaRecep : fila_recep_max;
+
+    recep_min = recep_min > aux->tempoRecep ? aux->tempoRecep : recep_min;
+    recep_med = aux->prox != NULL ? recep_med + aux->tempoRecep : (recep_med + aux->tempoRecep) / aux->id;
+    recep_max = recep_max < aux->tempoRecep ? aux->tempoRecep : recep_max;
+
+    fila_med_min = fila_med_min > aux->tempoFilaMedico ? aux->tempoFilaMedico : fila_med_min;
+    fila_med_med = aux->prox != NULL ? fila_med_med + aux->tempoFilaMedico : (fila_med_med + aux->tempoFilaRecep) / aux->id;
+    fila_med_max = fila_med_max < aux->tempoFilaMedico ? aux->tempoFilaMedico : fila_med_max;
+
+    med_min = med_min > aux->tempoMedico ? aux->tempoMedico : med_min;
+    med_med = aux->prox != NULL ? med_med + aux->tempoMedico : (med_med + aux->tempoMedico) / aux->id;
+    med_max = med_max < aux->tempoMedico ? aux->tempoMedico : med_max;
+
+    fila_recep_saida_min = fila_recep_saida_min > aux->tempoFilaRecepSaida ? aux->tempoFilaRecepSaida : fila_recep_saida_min;
+    fila_recep_saida_med = aux->prox != NULL ? fila_recep_saida_med + aux->tempoFilaRecepSaida : (fila_recep_saida_med + aux->tempoFilaRecepSaida) / aux->id;
+    fila_recep_saida_max = fila_recep_saida_max < aux->tempoFilaRecepSaida ? aux->tempoFilaRecepSaida : fila_recep_saida_max;
+
+    recep_saida_min = recep_saida_min > aux->tempoRecepSaida ? aux->tempoRecepSaida : recep_saida_min;
+    recep_saida_med = aux->prox != NULL ? recep_saida_med + aux->tempoRecepSaida : (recep_saida_med + aux->tempoFilaRecep) / aux->id;
+    recep_saida_max = recep_saida_max < aux->tempoRecepSaida ? aux->tempoRecepSaida : recep_saida_max;
+  }
+
+  printf("Fila Recepcao Tempo Minimo -> %i\n", fila_recep_min);
+  printf("Fila Recepcao Tempo Medio -> %.2f\n", fila_recep_med);
+  printf("Fila Recepcao Tempo Maximo -> %i\n\n", fila_recep_max);
+
+  printf("Recepcao Tempo Minimo -> %i\n", recep_min);
+  printf("Recepcao Tempo Medio -> %.2f\n", recep_med);
+  printf("Recepcao Tempo Maximo -> %i\n\n", recep_max);
+
+  printf("Fila Medico Tempo Minimo -> %i\n", fila_med_min);
+  printf("Fila Medico Tempo Medio -> %.2f\n", fila_med_med);
+  printf("Fila Medico Tempo Maximo -> %i\n\n", fila_med_max);
+
+  printf("Medico Tempo Minimo -> %i\n", med_min);
+  printf("Medico Tempo Medio -> %.2f\n", med_med);
+  printf("Medico Tempo Maximo -> %i\n\n", med_max);
+
+  printf("Recepcao Tempo Saida Minimo -> %i\n", fila_recep_saida_min);
+  printf("Recepcao Tempo Saida Medio -> %.2f\n", fila_recep_saida_med);
+  printf("Recepcao Tempo Saida Maximo -> %i\n\n", fila_recep_saida_max);
+
+  printf("Recepcao Saida Tempo Minimo -> %i\n", recep_saida_min);
+  printf("Recepcao Saida Tempo Medio -> %.2f\n", recep_saida_med);
+  printf("Recepcao Saida Tempo Maximo -> %i\n\n", recep_saida_max);
 }
 
 int main(void)
@@ -210,19 +302,13 @@ int main(void)
   system("cls");
 
   /** gera o primeiro paciente na fila da recepção */
-  fila_rec = aloca(identificacao_paciente, tempo_fila_rec, 0, 0, 0, 0, 0);
+  fila_rec = aloca(identificacao_paciente, 0, 0, 0, 0, 0, 0);
 
   tempo_prox_fila_rec = tempo_fila_rec + geraTempo();
 
-  ajustaTempo(tempo_prox_fila_rec);
+  tempo_prox_fila_rec = ajustaTempo(tempo_prox_fila_rec);
 
   tempo_atual = geraTempo();
-  fflush(stdout);
-  printf("\ntempo_atual -> %d\n", tempo_atual);
-  fflush(stdout);
-  printf("tempo_fila_rec -> %d\n", tempo_fila_rec);
-  fflush(stdout);
-  printf("tempo_prox_fila_rec -> %d\n", tempo_prox_fila_rec);
 
   //num_pacientes != identificacao_paciente &&
   while (fim)
@@ -317,7 +403,7 @@ int main(void)
           ajuste = recepcao->tempoFilaRecepSaida > tempo_atual ? tempo_atual + 60 : 0;
 
           recepcao->tempoRecepSaida = tempo_rec;
-          recepcao->tempoFilaRecepSaida = recepcao->tempoFilaRecepSaida - (tempo_atual + ajuste);
+          recepcao->tempoFilaRecepSaida = (tempo_atual + ajuste) - recepcao->tempoFilaRecepSaida;
         }
       }
     }
@@ -368,7 +454,8 @@ int main(void)
 
         tempo_med = gerarNumeroAleatorio(10, 20); //ficam de 15 a 25 no consultorio
 
-        medico->tempoFilaMedico = medico->tempoFilaMedico - tempo_atual; //esse é o calculo do tempo de espera na fila do medico
+        ajuste = medico->tempoFilaMedico > tempo_atual ? tempo_atual + 60 : 0;
+        medico->tempoFilaMedico = (tempo_atual + ajuste) - medico->tempoFilaMedico; //esse é o calculo do tempo de espera na fila do medico
         medico->tempoMedico = tempo_med;
 
         tempo_prox_med = tempo_med + tempo_atual;
@@ -378,23 +465,25 @@ int main(void)
         system("cls");
         display(fila_rec, recepcao, fila_med, medico, tempo_atual, tempo_prox_fila_rec, tempo_prox_rec, tempo_prox_med);
       }
-
-      if (fila_rec == NULL && recepcao == NULL && fila_med == NULL && medico == NULL)
-      {
-        fim = 0;
-      }
+    }
+    if (fila_rec == NULL && recepcao == NULL && fila_med == NULL && medico == NULL)
+    {
+      fim = 0;
     }
   }
-  fflush(stdout);
+  //display(fila_rec, recepcao, fila_med, medico, tempo_atual, tempo_prox_fila_rec, tempo_prox_rec, tempo_prox_med);
+
   system("cls");
-  display(fila_rec, recepcao, fila_med, medico, tempo_atual, tempo_prox_fila_rec, tempo_prox_rec, tempo_prox_med);
+  printf("\n\n");
+  fflush(stdout);
+  displayDados(saida);
 
-
-  display(saida, 0, 0, 0, 0, 0, 0, 0);
-
+  getch();
+  printf("\n\n");
+  fflush(stdout);
+  displayRelatorio(saida);
 
   //free(fila_rec);
-  //getch();
 
   return 0;
 }
